@@ -59,11 +59,6 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
     {
         return false;
     }
-    QString dir_name = directory.dirName();
-    if (!dir_name.endsWith("/"))
-        dir_name += "/";
-    if (isIgnore(dir_name))
-        return false;
 
     QString srcPath = QDir::toNativeSeparators(source);
     if (!srcPath.endsWith(QDir::separator()))
@@ -97,6 +92,12 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
         else if (fileInfo.isDir())
         {
             QDir dstDir(dstFilePath);
+            QString dir_name = dstDir.dirName();
+            if (!dir_name.endsWith("/"))
+                dir_name += "/";
+            if (isIgnore(dir_name))
+                continue;
+
             dstDir.mkpath(dstFilePath);
             if (!copyDir(srcFilePath, dstFilePath, override, filter_time))
             {
@@ -254,6 +255,7 @@ void MainWindow::on_pushButton_3_clicked()
     upload_time = download_time = 0;
     se->setValue("upload_time", 0);
     se->setValue("download_time", 0);
+    qDebug() << "清理缓存，可全部重新上传或下载";
 }
 
 void MainWindow::on_lineEdit_3_textEdited(const QString &arg1)
