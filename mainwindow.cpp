@@ -45,6 +45,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->checkBox->setChecked(se->value("timer_upload", false).toBool());
     ui->checkBox_2->setChecked(se->value("timer_download", false).toBool());
     ui->lineEdit_3->setText(se->value("ignore_reg", "^\\..*/$").toString());
+
+    connect(this, &MainWindow::signalOutput, this, [=](QString s){
+        ui->plainTextEdit->appendPlainText(s);
+        QTextCursor cursor = ui->plainTextEdit->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        ui->plainTextEdit->setTextCursor(cursor);
+        ui->plainTextEdit->update();
+    });
 }
 
 MainWindow::~MainWindow()
@@ -87,7 +95,7 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
                 QFile::setPermissions(dstFilePath, QFile::WriteOwner);
             }
             QFile::copy(srcFilePath, dstFilePath);
-            qDebug() << "    复制文件：" << srcFilePath;
+            output("    复制文件：" + srcFilePath);
         }
         else if (fileInfo.isDir())
         {
@@ -137,19 +145,19 @@ void MainWindow::upload()
 {
     if (local_dir.isEmpty() || remote_dir.isEmpty())
     {
-        qDebug() << "请设置同步目录路径";
+        output("请设置同步目录路径");
         return ;
     }
     if (syncing)
     {
-        qDebug() << "正在同步中，请稍后再试";
+        output("正在同步中，请稍后再试");
         return ;
     }
     QtConcurrent::run([=]{
         syncing = true;
-        qDebug() << "开始上传" << upload_time << " --> " << getTimestamp();
+        output("\n开始上传" + str(upload_time) + " --> " + str(getTimestamp()));
         copyDir(local_dir, remote_dir, true, upload_time);
-        qDebug() << "上传成功" << (upload_time = getTimestamp());
+        output("上传成功" + str(upload_time = getTimestamp()));
         se->setValue("upload_time", upload_time);
         syncing = false;
     });
@@ -159,19 +167,19 @@ void MainWindow::download()
 {
     if (local_dir.isEmpty() || remote_dir.isEmpty())
     {
-        qDebug() << "请设置同步目录路径";
+        output("请设置同步目录路径");
         return ;
     }
     if (syncing)
     {
-        qDebug() << "正在同步中，请稍后再试";
+        output("正在同步中，请稍后再试");
         return ;
     }
     QtConcurrent::run([=]{
         syncing = true;
-        qDebug() << "开始下载" << download_time << " --> " << getTimestamp();
+        output("\n开始下载" + str(download_time) + " --> " + str(getTimestamp()));
         copyDir(remote_dir, local_dir, true, download_time);
-        qDebug() << "下载成功" << (download_time = getTimestamp());
+        output("下载成功" + str(download_time = getTimestamp()));
         se->setValue("download_time", download_time);
         syncing = false;
     });
@@ -183,6 +191,11 @@ bool MainWindow::isIgnore(QString name)
         return true;
     QRegExp re(ui->lineEdit_3->text());
     return re.exactMatch(name);
+}
+
+void MainWindow::output(QString s)
+{
+    emit signalOutput(s);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -248,6 +261,7 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
         startTimer();
     }
     se->setValue("timer_interval", x);
+    start_time = getTimestamp();
 }
 
 void MainWindow::on_pushButton_3_clicked()
@@ -255,7 +269,7 @@ void MainWindow::on_pushButton_3_clicked()
     upload_time = download_time = 0;
     se->setValue("upload_time", 0);
     se->setValue("download_time", 0);
-    qDebug() << "清理缓存，可全部重新上传或下载";
+    output("清理缓存，可全部重新上传或下载");
 }
 
 void MainWindow::on_lineEdit_3_textEdited(const QString &arg1)

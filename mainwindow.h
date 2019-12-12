@@ -15,6 +15,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+#define str(x) QString::number(x)
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -53,6 +55,11 @@ private:
     void upload();
     void download();
     bool isIgnore(QString name);
+
+    void output(QString s);
+
+signals:
+    void signalOutput(QString s);
 
 private:
     Ui::MainWindow *ui;
