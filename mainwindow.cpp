@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
     });
 //    timer->start();
 //    start_time = getTimestamp();
-    ui->spinBox->setValue(interval); // 通过这个来设置 interval 和 start
 
     progress_timer = new QTimer(this);
     progress_timer->setInterval(30);
@@ -37,7 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
         int prop = (getTimestamp() - start_time) * ui->progressBar->maximum() / timer->interval();
         ui->progressBar->setValue(prop);
     });
-    progress_timer->start();
+//    progress_timer->start();
+
+    ui->spinBox->setValue(interval); // 通过这个来设置 interval 和 start
 
     upload_time = se->value("upload_time", 0).toLongLong();
     download_time = se->value("download_time", 0).toLongLong();
@@ -109,6 +110,20 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
 qint64 MainWindow::getTimestamp()
 {
     return QDateTime::currentMSecsSinceEpoch();
+}
+
+void MainWindow::startTimer()
+{
+    timer->start();
+    progress_timer->start();
+    start_time = getTimestamp();
+}
+
+void MainWindow::stopTimer()
+{
+    timer->stop();
+    progress_timer->stop();
+    ui->progressBar->setValue(0);
 }
 
 void MainWindow::upload()
@@ -184,12 +199,11 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
     se->setValue("timer_upload", ui->checkBox->isChecked());
     if (!ui->checkBox->isChecked() && !ui->checkBox_2->isChecked() && timer->isActive())
     {
-        timer->stop();
+        stopTimer();
     }
     else if ((ui->checkBox->isChecked() || ui->checkBox_2->isChecked()) && !timer->isActive())
     {
-        timer->start();
-        start_time = getTimestamp();
+        startTimer();
     }
 }
 
@@ -198,12 +212,11 @@ void MainWindow::on_checkBox_2_stateChanged(int arg1)
     se->setValue("timer_download", ui->checkBox_2->isChecked());
     if (!ui->checkBox->isChecked() && !ui->checkBox_2->isChecked() && timer->isActive())
     {
-        timer->stop();
+        stopTimer();
     }
     else if ((ui->checkBox->isChecked() || ui->checkBox_2->isChecked()) && !timer->isActive())
     {
-        timer->start();
-        start_time = getTimestamp();
+        startTimer();
     }
 }
 
@@ -214,11 +227,12 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
         x = 0;
     timer->setInterval(x*1000);
     if (x == 0 && timer->isActive())
-        timer->stop();
+    {
+        stopTimer();
+    }
     else if (x > 0 && !timer->isActive())
     {
-        timer->start();
-        start_time = getTimestamp();
+        startTimer();
     }
     se->setValue("timer_interval", x);
 }
