@@ -133,7 +133,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;按文件名的正则表达式来过滤文件&lt;/p&gt;&lt;p&gt;忽略目录需在末尾加上斜杠&amp;quot;/&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>^(\.git|\.vs/|\.vscode/|.*\.autosave)$</string>
+       <string>^\..*/$</string>
       </property>
       <property name="placeholderText">
        <string>过滤正则</string>

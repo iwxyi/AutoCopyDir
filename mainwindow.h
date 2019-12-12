@@ -40,6 +40,8 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_lineEdit_3_textEdited(const QString &arg1);
+
 private:
     bool copyDir(const QString &source, const QString &destination, bool override = false, qint64 filter_time = 0);
     qint64 getTimestamp();

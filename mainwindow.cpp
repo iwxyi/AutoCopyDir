@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     download_time = se->value("download_time", 0).toLongLong();
     ui->checkBox->setChecked(se->value("timer_upload", false).toBool());
     ui->checkBox_2->setChecked(se->value("timer_download", false).toBool());
+    ui->lineEdit_3->setText(se->value("ignore_reg", "^\\..*/$").toString());
 }
 
 MainWindow::~MainWindow()
@@ -253,4 +254,9 @@ void MainWindow::on_pushButton_3_clicked()
     upload_time = download_time = 0;
     se->setValue("upload_time", 0);
     se->setValue("download_time", 0);
+}
+
+void MainWindow::on_lineEdit_3_textEdited(const QString &arg1)
+{
+    se->setValue("ignore_reg", ui->lineEdit_3->text());
 }
