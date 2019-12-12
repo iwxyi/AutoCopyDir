@@ -112,6 +112,11 @@ qint64 MainWindow::getTimestamp()
     return QDateTime::currentMSecsSinceEpoch();
 }
 
+bool MainWindow::needSync()
+{
+    return ui->checkBox->isChecked() || ui->checkBox_2->isChecked();
+}
+
 void MainWindow::startTimer()
 {
     timer->start();
@@ -197,11 +202,11 @@ void MainWindow::on_lineEdit_2_editingFinished()
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
     se->setValue("timer_upload", ui->checkBox->isChecked());
-    if (!ui->checkBox->isChecked() && !ui->checkBox_2->isChecked() && timer->isActive())
+    if (!needSync() && timer->isActive())
     {
         stopTimer();
     }
-    else if ((ui->checkBox->isChecked() || ui->checkBox_2->isChecked()) && !timer->isActive())
+    else if (needSync() && !timer->isActive())
     {
         startTimer();
     }
@@ -210,11 +215,11 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 void MainWindow::on_checkBox_2_stateChanged(int arg1)
 {
     se->setValue("timer_download", ui->checkBox_2->isChecked());
-    if (!ui->checkBox->isChecked() && !ui->checkBox_2->isChecked() && timer->isActive())
+    if (!needSync() && timer->isActive())
     {
         stopTimer();
     }
-    else if ((ui->checkBox->isChecked() || ui->checkBox_2->isChecked()) && !timer->isActive())
+    else if (needSync() && !timer->isActive())
     {
         startTimer();
     }
@@ -230,7 +235,7 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
     {
         stopTimer();
     }
-    else if (x > 0 && !timer->isActive())
+    else if (x > 0 && !timer->isActive() && needSync())
     {
         startTimer();
     }

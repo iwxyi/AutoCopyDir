@@ -42,6 +42,7 @@ private:
     bool copyDir(const QString &source, const QString &destination, bool override = false, qint64 filter_time = 0);
     qint64 getTimestamp();
 
+    inline bool needSync();
     void startTimer();
     void stopTimer();
 
