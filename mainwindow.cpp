@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    se = new QSettings("settings.ini");
+    se = new QSettings("iwxyi.auto_copy_dir");
     local_dir = se->value("local_dir").toString();
     remote_dir = se->value("remote_dir").toString();
     ui->lineEdit->setText(local_dir);
@@ -48,10 +48,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(this, &MainWindow::signalOutput, this, [=](QString s){
         ui->plainTextEdit->appendPlainText(s);
+        if (ui->plainTextEdit->verticalScrollBar()->sliderPosition() < ui->plainTextEdit->verticalScrollBar()->maximum())
+            return ; // 人性化设计，放在末尾时才自动滚动
         QTextCursor cursor = ui->plainTextEdit->textCursor();
         cursor.movePosition(QTextCursor::End);
         ui->plainTextEdit->setTextCursor(cursor);
-        ui->plainTextEdit->update();
     });
 }
 
@@ -95,7 +96,7 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
                 QFile::setPermissions(dstFilePath, QFile::WriteOwner);
             }
             QFile::copy(srcFilePath, dstFilePath);
-            output("    复制文件：" + srcFilePath);
+            output("    复制文件：" + (srcFilePath.startsWith(ui->lineEdit->text()) ? srcFilePath.right(srcFilePath.length()-ui->lineEdit->text().length()) : srcFilePath));
         }
         else if (fileInfo.isDir())
         {
@@ -155,9 +156,9 @@ void MainWindow::upload()
     }
     QtConcurrent::run([=]{
         syncing = true;
-        output("\n开始上传" + str(upload_time) + " --> " + str(getTimestamp()));
+        output("\n开始上传 " + str(upload_time) + " --> " + str(getTimestamp()));
         copyDir(local_dir, remote_dir, true, upload_time);
-        output("上传成功" + str(upload_time = getTimestamp()));
+        output("上传成功 " + str(upload_time = getTimestamp()));
         se->setValue("upload_time", upload_time);
         syncing = false;
     });
@@ -177,9 +178,9 @@ void MainWindow::download()
     }
     QtConcurrent::run([=]{
         syncing = true;
-        output("\n开始下载" + str(download_time) + " --> " + str(getTimestamp()));
+        output("\n开始下载 " + str(download_time) + " --> " + str(getTimestamp()));
         copyDir(remote_dir, local_dir, true, download_time);
-        output("下载成功" + str(download_time = getTimestamp()));
+        output("下载成功 " + str(download_time = getTimestamp()));
         se->setValue("download_time", download_time);
         syncing = false;
     });

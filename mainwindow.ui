@@ -110,6 +110,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_3">
+        <property name="toolTip">
+         <string>清空时间，下次同步时会全部上传/下载文件夹</string>
+        </property>
         <property name="text">
          <string>清除缓存</string>
         </property>

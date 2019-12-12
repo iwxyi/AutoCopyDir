@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
 #include <QSettings>
+#include <QScrollBar>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
