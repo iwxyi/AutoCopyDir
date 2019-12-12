@@ -61,7 +61,7 @@ bool MainWindow::copyDir(const QString &source, const QString &destination, bool
     QString dir_name = directory.dirName();
     if (!dir_name.endsWith("/"))
         dir_name += "/";
-    if (isIgnore(directory.dirName()))
+    if (isIgnore(dir_name))
         return false;
 
     QString srcPath = QDir::toNativeSeparators(source);
@@ -134,7 +134,10 @@ void MainWindow::stopTimer()
 void MainWindow::upload()
 {
     if (local_dir.isEmpty() || remote_dir.isEmpty())
+    {
+        qDebug() << "请设置同步目录路径";
         return ;
+    }
     if (syncing)
     {
         qDebug() << "正在同步中，请稍后再试";
@@ -142,7 +145,7 @@ void MainWindow::upload()
     }
     QtConcurrent::run([=]{
         syncing = true;
-        qDebug() << "开始上传" << getTimestamp();
+        qDebug() << "开始上传" << upload_time << " --> " << getTimestamp();
         copyDir(local_dir, remote_dir, true, upload_time);
         qDebug() << "上传成功" << (upload_time = getTimestamp());
         se->setValue("upload_time", upload_time);
@@ -153,7 +156,10 @@ void MainWindow::upload()
 void MainWindow::download()
 {
     if (local_dir.isEmpty() || remote_dir.isEmpty())
+    {
+        qDebug() << "请设置同步目录路径";
         return ;
+    }
     if (syncing)
     {
         qDebug() << "正在同步中，请稍后再试";
@@ -161,7 +167,7 @@ void MainWindow::download()
     }
     QtConcurrent::run([=]{
         syncing = true;
-        qDebug() << "开始下载" << getTimestamp();
+        qDebug() << "开始下载" << download_time << " --> " << getTimestamp();
         copyDir(remote_dir, local_dir, true, download_time);
         qDebug() << "下载成功" << (download_time = getTimestamp());
         se->setValue("download_time", download_time);
@@ -174,7 +180,7 @@ bool MainWindow::isIgnore(QString name)
     if (ui->lineEdit_3->text().trimmed().isEmpty())
         return true;
     QRegExp re(ui->lineEdit_3->text());
-    return !re.exactMatch(name);
+    return re.exactMatch(name);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -240,4 +246,11 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
         startTimer();
     }
     se->setValue("timer_interval", x);
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    upload_time = download_time = 0;
+    se->setValue("upload_time", 0);
+    se->setValue("download_time", 0);
 }
